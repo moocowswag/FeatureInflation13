@@ -333,14 +333,14 @@
 	attack_verb_simple = list("slap")
 	hitsound = 'sound/effects/snap.ogg'
 
-/obj/item/hand_item/slapper/attack(mob/living/slapped, mob/living/carbon/human/user)
+/obj/item/hand_item/tail_slapper/attack(mob/living/slapped, mob/living/carbon/human/user)
 	SEND_SIGNAL(user, COMSIG_LIVING_SLAP_MOB, slapped)
 
 	if(ishuman(slapped))
 		var/mob/living/carbon/human/human_slapped = slapped
 		SEND_SIGNAL(human_slapped, COMSIG_ORGAN_WAG_TAIL, FALSE)
 	user.do_attack_animation(slapped)
-	user.SpinAnimation(speed = 10, loops = 2)
+	user.spin(4, 1)
 
 
 	var/slap_volume = 50
