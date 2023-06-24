@@ -325,6 +325,74 @@
 
 	qdel(src)
 
+/obj/item/hand_item/tail_slapper
+	name = "tail slapper"
+	desc = "This is how real non humans fight."
+	inhand_icon_state = "nothing"
+	attack_verb_continuous = list("slaps")
+	attack_verb_simple = list("slap")
+	hitsound = 'sound/effects/snap.ogg'
+
+/obj/item/hand_item/slapper/attack(mob/living/slapped, mob/living/carbon/human/user)
+	SEND_SIGNAL(user, COMSIG_LIVING_SLAP_MOB, slapped)
+
+	if(ishuman(slapped))
+		var/mob/living/carbon/human/human_slapped = slapped
+		SEND_SIGNAL(human_slapped, COMSIG_ORGAN_WAG_TAIL, FALSE)
+	user.do_attack_animation(slapped)
+	user.SpinAnimation(speed = 10, loops = 2)
+
+
+	var/slap_volume = 50
+	var/datum/status_effect/offering/kiss_check = slapped.has_status_effect(/datum/status_effect/offering)
+	if(kiss_check && istype(kiss_check.offered_item, /obj/item/hand_item/kisser) && (user in kiss_check.possible_takers))
+		user.visible_message(
+			span_danger("[user] scoffs at [slapped]'s advance, winds up, and smacks [slapped.p_them()] hard to the ground!"),
+			span_notice("The nerve! You wind back your tail and smack [slapped] hard enough to knock [slapped.p_them()] over!"),
+			span_hear("You hear someone get the everloving shit smacked out of them!"),
+			ignored_mobs = slapped,
+		)
+		to_chat(slapped, span_userdanger("You see [user] scoff and pull back [user.p_their()] tail, then suddenly you're on the ground with an ungodly ringing in your ears!"))
+		slap_volume = 120
+		SEND_SOUND(slapped, sound('sound/weapons/flash_ring.ogg'))
+		shake_camera(slapped, 2, 2)
+		slapped.Paralyze(2.5 SECONDS)
+		slapped.adjust_confusion(7 SECONDS)
+		slapped.adjustStaminaLoss(40)
+	else if(user.zone_selected == BODY_ZONE_HEAD || user.zone_selected == BODY_ZONE_PRECISE_MOUTH)
+		if(user == slapped)
+			user.visible_message(
+				span_notice("[user] facepalms!"),
+				span_notice("You facepalm."),
+				span_hear("You hear a slap."),
+			)
+
+		else
+			if(slapped.IsSleeping() || slapped.IsUnconscious())
+				user.visible_message(
+					span_notice("[user] slaps [slapped] in the face, trying to wake [slapped.p_them()] up!"),
+					span_notice("You slap [slapped] in the face, trying to wake [slapped.p_them()] up!"),
+					span_hear("You hear a slap."),
+				)
+
+				// Worse than just help intenting people.
+				slapped.AdjustSleeping(-75)
+				slapped.AdjustUnconscious(-50)
+
+			else
+				user.visible_message(
+					span_danger("[user] slaps [slapped] in the face with your tail!"),
+					span_notice("You slap [slapped] in the face with your tail!"),
+					span_hear("You hear a slap."),
+				)
+	else
+		user.visible_message(
+			span_danger("[user] slaps [slapped] with their tail!"),
+			span_notice("You slap [slapped] with your tail!"),
+			span_hear("You hear a slap."),
+		)
+	playsound(slapped, 'sound/weapons/slap.ogg', slap_volume, TRUE, -1)
+	return
 
 /obj/item/hand_item/hand
 	name = "hand"

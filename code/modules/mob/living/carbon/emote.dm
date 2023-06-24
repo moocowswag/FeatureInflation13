@@ -134,6 +134,22 @@
 		qdel(N)
 		to_chat(user, span_warning("You're incapable of slapping in your current state."))
 
+/datum/emote/living/carbon/tslap
+	key = "tslap"
+	key_third_person = "tslaps"
+	hands_use_check = TRUE
+	cooldown = 3 SECONDS // to prevent endless table slamming
+
+/datum/emote/living/carbon/slap/run_emote(mob/user, params, type_override, intentional)
+	. = ..()
+	if(!.)
+		return
+	var/obj/item/hand_item/tail_slapper/N = new(user)
+	if(user.put_in_hands(N))
+		to_chat(user, span_notice("You ready your slapping tail."))
+	else
+		qdel(N)
+		to_chat(user, span_warning("You're incapable of slapping in your current state."))
 
 /datum/emote/living/carbon/hand
 	key = "hand"
