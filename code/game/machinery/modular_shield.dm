@@ -408,12 +408,19 @@
 		calculate_radius()
 	active = TRUE
 	initiating = TRUE
+	var/target_tile = src
+	current_radius = 0
 	for(var/i in 1 to round(max_radius))
+		var/target_tile = get_step(src,)
 		if(!turf.open)
 			return
-		if(locate(/obj/structure/emergency_shield/modular) in target_tile)
-			continue
-		new
+		if(locate(/obj/structure/emergency_shield/modular) in target_tile)//to-do check density instead?
+			return
+		var/obj/structure/emergency_shield/modular/deploying_shield = new(target_tile)
+		deploying_shield.shield_generator = (src)
+		LAZYADD(deployed_shields, deploying_shield)
+		current_radius + 1
+		var/target_tile = get_step(target_tile,dir)
 
 
 //Start of other machines
