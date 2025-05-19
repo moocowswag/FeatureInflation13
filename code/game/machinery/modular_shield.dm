@@ -356,7 +356,7 @@
 	//of the max radius we can support we get a very small bonus multiplier
 	current_regeneration = (max_regeneration / (0.5 + (radius * 2)/max_radius))
 
-	if(!exterior_only & internal_regen_penalty)
+	if((!exterior_only) & internal_regen_penalty)
 		current_regeneration *= 0.5
 
 ///Reduces the strength of the shield based on the given integer
@@ -385,7 +385,7 @@
 /obj/machinery/modular_shield_generator/gate
 	name = "modular shield gate"
 	desc = "A forcefield generator that can deploy a flat wall, it seems more stationary than its cousins. It can't handle G-force and will require frequent reboots when built on mobile craft."
-	icon = 'icons/obj/machines/modular_shield_generator.dmi'
+	icon = 'icons/obj/machines/modular_shield_gate.dmi'
 	icon_state = "gen_recovering_closed"
 	density = FALSE
 	circuit = /obj/item/circuitboard/machine/modular_shield_generator
@@ -401,13 +401,20 @@
 		return FALSE
 	TRUE
 
-/obj/machinery/modular_shield_generator/proc/activate_shields()
+/obj/machinery/modular_shield_generator/gate/proc/activate_shields()
 	if(active || (machine_stat & NOPOWER))//bug or did admin call proc on already active shield gen?
 		return
 	if(max_radius < 0)//what the fuck are admins doing
 		calculate_radius()
 	active = TRUE
 	initiating = TRUE
+	for(var/i in 1 to round(max_radius))
+		if(!turf.open)
+			return
+		if(locate(/obj/structure/emergency_shield/modular) in target_tile)
+			continue
+		new
+
 
 //Start of other machines
 ///The general code used for machines that want to connect to the network
