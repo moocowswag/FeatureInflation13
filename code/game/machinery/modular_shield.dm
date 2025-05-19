@@ -726,6 +726,7 @@
 
 	shield_generator.shield_drain(15 / severity) //Light is 2 heavy is 1, note emp is usually a large aoe, tweak the number if not enough damage
 
+//Damage from explosions, remember we dont use armor
 /obj/structure/emergency_shield/modular/ex_act(severity)
 	if(isnull(shield_generator))
 		qdel(src)
@@ -743,3 +744,13 @@
 
 		if(EXPLODE_DEVASTATE)
 			shield_generator.shield_drain(100)
+
+/obj/structure/emergency_shield/modular/hulk_damage()
+	if(isnull(shield_generator))
+		qdel(src)
+		return 0
+	shield_generator.shield_drain(30 + shield_generator.current_regeneration)//shield will eventually go down no matter the regen, flat number is how fast the hulk eats at reserves
+	return 0
+
+
+
