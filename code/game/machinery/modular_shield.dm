@@ -392,23 +392,29 @@
 /obj/machinery/modular_shield_generator/gate
 	name = "modular shield gate"
 	desc = "A forcefield generator that can deploy a flat wall, it seems more stationary than its cousins. It can't handle G-force and will require frequent reboots when built on mobile craft."
-	icon = 'icons/obj/machines/modular_shield_gate.dmi'
-	icon_state = "gen_recovering_closed"
+	icon = 'icons/obj/machines/modular_shield_generator.dmi'
+	icon_state = "gate_recovering_closed"
 	density = FALSE
 	circuit = /obj/item/circuitboard/machine/modular_shield_generator
 	internal_regen_penalty = FALSE
+	layer = GIB_LAYER
+
+/obj/machinery/modular_shield_generator/gate/update_icon_state()
+	. = ..()
+	icon_state = ("gate_[!(machine_stat & NOPOWER) ? "[recovering ? "recovering_" : "ready_"]" : "no_power_"][(panel_open)?"open" : "closed"]")
+	return
 
 /obj/machinery/modular_shield_generator/gate/ui_interact(mob/user, datum/tgui/ui)
 	return
 
-/obj/machinery/modular_shield/module/wrench_act(mob/living/user, obj/item/tool)
+/obj/machinery/modular_shield_generator/gate/wrench_act(mob/living/user, obj/item/tool)
 	. = ..()
 
 	if(!default_change_direction_wrench(user, tool))
 		return FALSE
-	TRUE
+	return TRUE
 
-/obj/machinery/modular_shield_generator/gate/proc/activate_shields()
+/obj/machinery/modular_shield_generator/gate/activate_shields()
 	if(active || (machine_stat & NOPOWER))//bug or did admin call proc on already active shield gen?
 		return
 	if(max_radius < 0)//what the fuck are admins doing
@@ -416,10 +422,10 @@
 	active = TRUE
 	initiating = TRUE
 	var/color_shield = cached_color_filter || color
-	var/turf/target_tile = src
+	var/turf/target_tile = src.loc
 	radius = 0
 	for(var/i in 1 to round(max_radius))
-		if((!target_tile.open) || (locate/obj/structure/emergency_shield/modular) in target_tile)
+		if((!isopenturf(target_tile)) || (locate(/obj/structure/emergency_shield/modular) in target_tile))
 			addtimer(CALLBACK(src, PROC_REF(finish_field)), 2 SECONDS)
 			calculate_regeneration()
 			return
@@ -429,7 +435,7 @@
 		if(color_shield)
 			deploying_shield.add_atom_colour(color_shield, FIXED_COLOUR_PRIORITY)
 		radius += 1
-		var/target_tile = get_step(target_tile,dir)
+		target_tile = get_step(target_tile,dir)
 	addtimer(CALLBACK(src, PROC_REF(finish_field)), 2 SECONDS)
 	calculate_regeneration()
 
