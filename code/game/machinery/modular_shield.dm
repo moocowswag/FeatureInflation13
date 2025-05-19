@@ -415,19 +415,23 @@
 		calculate_radius()
 	active = TRUE
 	initiating = TRUE
-	var/target_tile = src
-	current_radius = 0
+	var/color_shield = cached_color_filter || color
+	var/turf/target_tile = src
+	radius = 0
 	for(var/i in 1 to round(max_radius))
-		var/target_tile = get_step(src,)
-		if(!turf.open)
-			return
-		if(locate(/obj/structure/emergency_shield/modular) in target_tile)//to-do check density instead?
+		if((!target_tile.open) || (locate/obj/structure/emergency_shield/modular) in target_tile)
+			addtimer(CALLBACK(src, PROC_REF(finish_field)), 2 SECONDS)
+			calculate_regeneration()
 			return
 		var/obj/structure/emergency_shield/modular/deploying_shield = new(target_tile)
 		deploying_shield.shield_generator = (src)
 		LAZYADD(deployed_shields, deploying_shield)
-		current_radius + 1
+		if(color_shield)
+			deploying_shield.add_atom_colour(color_shield, FIXED_COLOUR_PRIORITY)
+		radius += 1
 		var/target_tile = get_step(target_tile,dir)
+	addtimer(CALLBACK(src, PROC_REF(finish_field)), 2 SECONDS)
+	calculate_regeneration()
 
 
 //Start of other machines
