@@ -70,6 +70,9 @@
 	///This decides if we get nerfed by projecting on internal turfs with floors and stuff
 	var/internal_regen_penalty = TRUE
 
+	///What machine we are for the purpose of updating icon state
+	var/icon_type = "gen"
+
 /obj/machinery/modular_shield_generator/power_change()
 	. = ..()
 	if(!(machine_stat & NOPOWER))
@@ -136,8 +139,8 @@
 /obj/machinery/modular_shield_generator/screwdriver_act(mob/living/user, obj/item/tool)
 	. = ..()
 
-	if(default_deconstruction_screwdriver(user,"gen_[!(machine_stat & NOPOWER) ? "[recovering ? "recovering_" : "ready_"]" : "no_power_"]open",
-		"gen_[!(machine_stat & NOPOWER) ? "[recovering ? "recovering_" : "ready_"]" : "no_power_"]closed",  tool))
+	if(default_deconstruction_screwdriver(user,"[icon_type]_[!(machine_stat & NOPOWER) ? "[recovering ? "recovering_" : "ready_"]" : "no_power_"]open",
+		"[icon_type]_[!(machine_stat & NOPOWER) ? "[recovering ? "recovering_" : "ready_"]" : "no_power_"]closed",  tool))
 		return TRUE
 
 /obj/machinery/modular_shield_generator/crowbar_act(mob/living/user, obj/item/tool)
@@ -263,7 +266,7 @@
 
 /obj/machinery/modular_shield_generator/update_icon_state()
 
-	icon_state = ("gen_[!(machine_stat & NOPOWER) ? "[recovering ? "recovering_" : "ready_"]" : "no_power_"][(panel_open)?"open" : "closed"]")
+	icon_state = ("[icon_type]_[!(machine_stat & NOPOWER) ? "[recovering ? "recovering_" : "ready_"]" : "no_power_"][(panel_open)?"open" : "closed"]")
 	return ..()
 
 //ui stuff
@@ -398,11 +401,7 @@
 	circuit = /obj/item/circuitboard/machine/modular_shield_generator
 	internal_regen_penalty = FALSE
 	layer = GIB_LAYER
-
-/obj/machinery/modular_shield_generator/gate/update_icon_state()
-	. = ..()
-	icon_state = ("gate_[!(machine_stat & NOPOWER) ? "[recovering ? "recovering_" : "ready_"]" : "no_power_"][(panel_open)?"open" : "closed"]")
-	return
+	icon_type = "gate"
 
 /obj/machinery/modular_shield_generator/gate/ui_interact(mob/user, datum/tgui/ui)
 	return
@@ -414,6 +413,7 @@
 		return FALSE
 	return TRUE
 
+//we shield a tile and step forward until we either run out of max radius or hit a closed turf, every turf we shield is a penalty towards regen
 /obj/machinery/modular_shield_generator/gate/activate_shields()
 	if(active || (machine_stat & NOPOWER))//bug or did admin call proc on already active shield gen?
 		return
