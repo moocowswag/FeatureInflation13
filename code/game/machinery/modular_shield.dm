@@ -680,8 +680,11 @@
 	color = "#00ffff"
 	density = FALSE
 	alpha = 100
+	flags_1 = PREVENT_CLICK_UNDER_1
+	explosion_block = 2
 	resistance_flags = INDESTRUCTIBLE //the shield itself is indestructible or at least should be
 	no_damage_feedback = "weakening the generator sustaining it"
+	can_atmos_pass = ATMOS_PASS_NO
 
 	///The shield generator sustaining us
 	var/obj/machinery/modular_shield_generator/shield_generator
@@ -689,10 +692,11 @@
 
 /obj/structure/emergency_shield/modular/Initialize(mapload)
 	. = ..()
+	AddElement(/datum/element/blocks_explosives)
 	AddElement(/datum/element/atmos_sensitive, mapload)
 
 /obj/structure/emergency_shield/modular/should_atmos_process(datum/gas_mixture/air, exposed_temperature)
-	return exposed_temperature > (T0C + 400) //starts taking damage from high temps at the same temperature that nonreinforced glass does
+	return exposed_temperature > (T0C + 200)
 
 //Damage from atmos
 /obj/structure/emergency_shield/modular/atmos_expose(datum/gas_mixture/air, exposed_temperature)
@@ -721,3 +725,21 @@
 		return
 
 	shield_generator.shield_drain(15 / severity) //Light is 2 heavy is 1, note emp is usually a large aoe, tweak the number if not enough damage
+
+/obj/structure/emergency_shield/modular/ex_act(severity)
+	if(isnull(shield_generator))
+		qdel(src)
+		return
+
+	switch(severity)
+
+		if(EXPLODE_LIGHT)
+			shield_generator.shield_drain(20)
+			return
+
+		if(EXPLODE_HEAVY)
+			shield_generator.shield_drain(50)
+			return
+
+		if(EXPLODE_DEVASTATE)
+			shield_generator.shield_drain(100)
