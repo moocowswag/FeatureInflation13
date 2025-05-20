@@ -439,6 +439,10 @@
 	addtimer(CALLBACK(src, PROC_REF(finish_field)), 2 SECONDS)
 	calculate_regeneration()
 
+/obj/machinery/modular_shield_generator/gate/take_damage()
+	if(active)
+		return
+	. = ..()
 
 //Start of other machines
 ///The general code used for machines that want to connect to the network
